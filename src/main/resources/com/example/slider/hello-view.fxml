@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+
+<VBox alignment="CENTER"
+      spacing="15"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.example.slider.Controller">
+
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+
+
+    <ImageView fx:id="screen"
+               fitWidth="600"
+               fitHeight="400"
+               preserveRatio="true"/>
+
+    <!-- Панель кнопок -->
+    <HBox spacing="10" alignment="CENTER">
+        <Button text="◀ Назад" onAction="#prevSlide"/>
+        <Button text="▶ Вперёд" onAction="#nextSlide"/>
+    </HBox>
+
+    <!-- Скорость -->
+    <HBox spacing="10" alignment="CENTER">
+        <Label text="Задержка (мс):"/>
+        <TextField fx:id="speedField" prefWidth="100"/>
+        <Button text="Применить" onAction="#applySpeed"/>
+    </HBox>
+
+</VBox>
