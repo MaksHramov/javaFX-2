@@ -1,8 +1,8 @@
-# Memory Gallery
+# Slider
 ----------------
 
 ## Описание
-Memory Gallery — JavaFX-приложение для создания и воспроизведения интерактивных слайд-шоу с текстовыми пометками, тегами и графическими оверлеями. Пользователь загружает изображения, добавляет эмоции и заметки, настраивает анимацию и музыку, после чего сохраняет коллекцию в JSON и делится ею. Проект демонстрирует работу с JavaFX UI, медиаплеером, файловой системой и сериализацией.
+Slider — JavaFX-приложение для создания и воспроизведения интерактивных слайд-шоу с текстовыми пометками, тегами и графическими оверлеями. Пользователь загружает изображения, добавляет эмоции и заметки, настраивает анимацию и музыку, после чего сохраняет коллекцию в JSON и делится ею. Проект демонстрирует работу с JavaFX UI, медиаплеером, файловой системой и сериализацией.
 
 ---
 
@@ -21,17 +21,13 @@ Beta
 ---
 
 ## Ссылка на репозиторий и демо
-[GitHub репозиторий](https://github.com/godmozzarella/memory-gallery)
+[GitHub репозиторий](https://github.com/MaksHramov/javaFX-2/);
 
 ---
 
 ## Основные возможности
-- Добавление фото и видео-слайдов с выбором типа (Photo/Motion)  
-- Редактор тегов, заметок и текста оверлея с предпросмотром  
-- Графические эмоции поверх изображения: выбор формы, цвета, размера, прозрачности  
-- Настройка анимации (Fade/Slide/Scale) и длительности для каждого слайда  
-- Подключение фоновой музыки и управление воспроизведением  
-- Захват текущего слайда в PNG и сохранение/загрузка коллекций в JSON  
+- Добавление фото и видео-слайдов с выбором типа (Photo/Motion)     
+- Настройка анимации (Fade/Slide/Scale) и длительности для каждого слайда   
 - Автовоспроизведение с режимами Sequential, Loop и Bounce
 
 ---
@@ -55,92 +51,95 @@ Beta
 ## Диаграмма классов
 ```mermaid
 classDiagram
-    class MemoryGalleryApplication
-    class MainController{
+    class HelloApplication{
+        +start(Stage)
+        +main(String[])
+    }
+
+    class Controller{
+        -screen : ImageView
+        -iter : Iterator
+        -animation : SlideAnimation
         +initialize()
-        +handleAddSlide()
-        +handleSaveCollection()
-        +handlePlayShow()
+        +nextSlide()
+        +prevSlide()
+        +applySpeed()
     }
-    class SlideShowService{
-        +createSlide()
-        +addSlides()
-        +moveSlide()
-        +buildStatus()
-    }
-    class SlideCollectionService{
-        +save()
-        +load()
-    }
-    class SlidePlaybackService{
-        +play()
-        +stop()
-    }
-    class AudioService{
-        +load()
-        +play()
-        +pause()
-        +stop()
-    }
-    class SlideIterator{
-        +current()
-        +next()
-        +previous()
-        +moveTo()
-    }
-    class SlideFactoryProvider{
-        +getFactory()
-    }
-    class PhotoSlideFactory
-    class MotionSlideFactory
-    SlideFactoryProvider --> PhotoSlideFactory : создает
-    SlideFactoryProvider --> MotionSlideFactory : создает
-    PhotoSlideFactory ..|> SlideFactory
-    MotionSlideFactory ..|> SlideFactory
-    class SlideFactory{
+
+    HelloApplication --> Controller : загружает FXML
+    class Aggregate{
         <<interface>>
-        +create()
+        +getIterator() Iterator
     }
-    class Slide{
-        +title
-        +type
-        +getOverlay()
+
+    class Iterator{
+        <<interface>>
+        +hasNext(int) boolean
+        +next() Object
+        +preview() Object
     }
-    class SlideOverlay{
-        +tags
-        +overlayText
+
+    class ConcreteAggregate{
+        -filetopic : String
+        +getIterator() Iterator
     }
-    class SlideNote{
-        +text
-        +updatedAt
+
+    class ImageIterator{
+        -current : int
+        +hasNext(int) boolean
+        +next() Object
+        +preview() Object
     }
-    class AnimationSettings{
-        +effect
-        +duration
-        +amplitude
+
+    ConcreteAggregate ..|> Aggregate
+    ConcreteAggregate --> ImageIterator : создает
+    ImageIterator ..|> Iterator
+    Controller --> Iterator : использует
+    class SlideAnimation{
+        -timeline : Timeline
+        -delay : double
+        +play()
+        +stop()
+        +setDelay(double)
     }
-    class SlideDto
-    class SlideCollectionDto
-    class SlideOverlayDto
-    class EmotionOverlayDto
-    class SlideNoteDto
-    class AnimationSettingsDto
-    MainController --> SlideShowService
-    MainController --> SlideCollectionService
-    MainController --> SlidePlaybackService
-    MainController --> AudioService
-    SlideShowService --> SlideIterator
-    SlideShowService --> SlideFactoryProvider
-    SlideShowService --> Slide
-    Slide --> SlideOverlay
-    Slide --> SlideNote
-    Slide --> AnimationSettings
-    SlideCollectionService --> SlideCollectionDto
-    SlideCollectionDto --> SlideDto
-    SlideDto --> SlideOverlayDto
-    SlideDto --> SlideNoteDto
-    SlideDto --> AnimationSettingsDto
-    SlideOverlayDto --> EmotionOverlayDto
+
+    Controller --> SlideAnimation : управляет
+    SlideAnimation --> Iterator : вызывает next()
+    class SlideStatus{
+        -currentIndex : int
+        -total : int
+        -delay : double
+        +format() String
+    }
+
+    class SlideStatusBuilder{
+        +withCurrentIndex(int)
+        +withTotal(int)
+        +withDelay(double)
+        +build() SlideStatus
+    }
+
+    SlideStatusBuilder --> SlideStatus : создает
+    class SlideShowFactory{
+        <<interface>>
+        +createSlideShow() ImageView
+    }
+
+    class AutoSlideShowFactory
+    class ManualSlideShowFactory
+    class SlideShowFactoryProvider{
+        +getFactory(boolean) SlideShowFactory
+    }
+
+    AutoSlideShowFactory ..|> SlideShowFactory
+    ManualSlideShowFactory ..|> SlideShowFactory
+    SlideShowFactoryProvider --> SlideShowFactory : возвращает
+    class ImageView
+    class Timeline
+
+    SlideAnimation --> Timeline
+    Controller --> ImageView
+
 ```
 
 ---
@@ -148,11 +147,11 @@ classDiagram
 ## Установка и запуск
 1. Клонировать репозиторий:  
 ```bash
-git clone https://github.com/godmozzarella/memory-gallery.git
+git clone https://github.com/MaksHramov/javaFX-2.git
 ```
 2. Перейти в директорию проекта:  
 ```bash
-cd memory-gallery
+cd javaFX-2
 ```
 3. Собрать проект:  
 ```bash
@@ -165,23 +164,8 @@ mvn javafx:run
 
 ---
 
-## Использование
-1. Нажмите «Добавить» и выберите изображение/видео-файл — файл копируется в локальное хранилище.  
-2. Настройте заголовок, тип слайда, теги и текст оверлея; добавьте эмоцию и заметку.  
-3. Выберите эффект анимации, длительность и амплитуду.  
-4. Управляйте позициями слайдов (вверх/вниз/в начало/в конец).  
-5. Сохраняйте отдельный слайд в PNG или экспортируйте всю коллекцию в JSON.  
-6. Загружайте коллекции обратно и выбирайте режим Playback (Sequential/Loop/Bounce).  
-7. Подключайте музыку, управляйте воспроизведением и запускайте автоматический показ.
-
----
-
-## Особенности реализации
-- **JSON-персистентность**: `SlideCollectionService` конвертирует доменные модели в DTO и обратно через Jackson с нормализацией путей.  
+## Особенности реализации 
 - **Анимации**: `SlidePlaybackService` включает Fade/Slide/Scale-транзишены и сбрасывает состояние узла после завершения.  
-- **Навигация**: `SlideIterator` упорядочивает переходы по списку и поддерживает клаузы first/last/bounce.  
-- **Музыка**: `AudioService` оборачивает JavaFX `MediaPlayer` и синхронизируется с автопоказом.  
-- **Снимки**: `NodeSnapshotUtil` делает PNG-шоты слайдов через JavaFX Snapshot API.  
 - **Пути и каталоги**: `AppPaths` централизовано задаёт директории для изображений, коллекций и экспортов.
 
 ---
